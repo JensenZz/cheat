@@ -55,3 +55,13 @@
 - Task 3 已新增 `build_logger(name)` 与应用入口 `main()`。
 - 当前 `build_logger()` 使用 `logging.basicConfig(...)` 初始化基础日志格式，并显式设置 `logger.setLevel(logging.INFO)` 以兼容 pytest `caplog` 捕获。
 - Task 3 的最小测试 `tests/test_logging_setup.py` 已完成红测与绿测，当前通过（`1 passed`）。
+- Task 4 已新增检测结果基础模型与伪检测器接口：`src/auto_ops/shared/models.py`、`src/auto_ops/detector/base.py`、`src/auto_ops/detector/fake.py`、`tests/detector/test_fake_detector.py`。
+- Task 4 首轮规格复核发现 3 个偏差：`Detection.bbox` 被实现为 `list`、`center` 按 `x/y/width/height` 语义计算、`Detector` 在 `shared/models.py` 中重复定义。
+- Task 4 经 TDD 回修后，`Detection.bbox` 已收敛为 `tuple[int, int, int, int]`，`center` 已按 `x1/y1/x2/y2` 语义计算，`Detector` 仅保留在 `src/auto_ops/detector/base.py`。
+- `FakeDetector` 当前会深拷贝 seeded 输入，避免外部修改污染检测结果；`Detection` 额外校验 `x2 >= x1` 与 `y2 >= y1`，非法 bbox 会抛出校验错误。
+- Task 4 本地验证命令 `python3 -m pytest tests/detector/test_fake_detector.py -v` 当前结果为 `5 passed`，但运行解释器仍是系统 `Python 3.9.6`，后续建议在项目要求的 Python 3.11+ 环境补跑一次完整验证。
+- Task 5 已新增采集接口骨架：`src/auto_ops/capture/base.py`、`src/auto_ops/capture/windows.py`、`tests/capture/test_window_capture.py`。
+- 由于 `src/auto_ops/shared/models.py` 已存在 `WindowSnapshot`，`src/auto_ops/capture/windows.py` 当前采用重导出方案暴露 `WindowSnapshot`，满足 `from auto_ops.capture.windows import WindowSnapshot` 的计划接口要求，避免重复定义模型。
+- Task 5 代码质量回修后，`WindowSnapshot` 已改为 `@dataclass(frozen=True)`，并将 `image` 字段从 `Any` 收窄为 `object`，使其更适合作为跨模块共享的不可变快照值对象。
+- `Detection` 现已补充 `confidence` 范围校验，要求输入必须位于 `[0.0, 1.0]`；对应非法置信度测试已补齐。
+- Task 5 相关独立验证命令 `python3 -m pytest tests/detector/test_fake_detector.py tests/capture/test_window_capture.py -v` 当前结果为 `9 passed`，可作为继续 Task 6 的最新证据。

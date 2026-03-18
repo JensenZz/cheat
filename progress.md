@@ -40,3 +40,14 @@
 - Task 3 绿测已通过：同一命令结果 `1 passed`。
 - 为兼容当前 pytest `caplog` 捕获行为，`build_logger()` 在最小实现基础上额外显式设置了 `logger.setLevel(logging.INFO)`。
 - Task 3 规格复核 PASS，Python 代码质量复核 Ready；当前实现允许继续后续任务。
+- 已完成 Task 4 的最小实现，新增/更新文件：`src/auto_ops/shared/models.py`、`src/auto_ops/detector/base.py`、`src/auto_ops/detector/fake.py`、`tests/detector/test_fake_detector.py`。
+- Task 4 红测已验证：`python3 -m pytest tests/detector/test_fake_detector.py -v` 首轮因规格偏差失败，具体表现为 `bbox` 返回 `list` 且 `center` 按错误坐标语义计算。
+- Task 4 经过一轮规格复核与一轮 Python 代码质量复核后，按 TDD 补充了 seeded 输入隔离与非法 bbox 校验测试，并回修实现。
+- Task 4 最新绿测已通过：`python3 -m pytest tests/detector/test_fake_detector.py -v` 结果 `5 passed`。
+- 最新评审结论：Task 4 规格复核 PASS，Python 代码质量复核 Ready，通用代码评审 APPROVE；当前实现允许继续 Task 5。
+- 已完成 Task 5 的最小实现，新增文件：`src/auto_ops/capture/base.py`、`src/auto_ops/capture/windows.py`、`tests/capture/test_window_capture.py`。
+- Task 5 红测过程已验证：最初 `python` / `pytest` 命令在当前环境不可用，实际采用 `python3 -m pytest tests/capture/test_window_capture.py -v` 作为有效验证命令；实现前测试目标为 `auto_ops.capture.windows` 不存在或未暴露 `WindowSnapshot`。
+- Task 5 采用最小适配实现：`src/auto_ops/capture/windows.py` 通过重导出 `shared.models.WindowSnapshot` 满足计划接口，不重复定义窗口快照模型。
+- Task 5 在代码质量回修阶段补充了不可变性约束，并为 `WindowSnapshot` 增加冻结性测试；同时补充了 `Detection.confidence` 非法输入测试与模型校验。
+- 最新相关验证命令：`python3 -m pytest tests/detector/test_fake_detector.py tests/capture/test_window_capture.py -v`，结果 `9 passed`。
+- 最新评审结论：Task 5 规格复核 PASS，Python 代码质量复核 Ready，通用代码评审 APPROVE；当前实现允许继续 Task 6。
