@@ -1,0 +1,13 @@
+scene:
+  id: browser-demo
+  name: Browser Demo
+  window_match:
+    title_contains:
+      - Demo
+  capture_config:
+    fps: 2
+targets:
+  - class_name: primary_button
+    min_confidence: 0.6
+    weight: 80
+    cooldown_ms: 1000
