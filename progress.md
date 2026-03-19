@@ -51,3 +51,107 @@
 - Task 5 在代码质量回修阶段补充了不可变性约束，并为 `WindowSnapshot` 增加冻结性测试；同时补充了 `Detection.confidence` 非法输入测试与模型校验。
 - 最新相关验证命令：`python3 -m pytest tests/detector/test_fake_detector.py tests/capture/test_window_capture.py -v`，结果 `9 passed`。
 - 最新评审结论：Task 5 规格复核 PASS，Python 代码质量复核 Ready，通用代码评审 APPROVE；当前实现允许继续 Task 6。
+- 已完成 Task 6 的最小实现，新增文件：`src/auto_ops/state/builder.py`、`tests/state/test_builder.py`。
+- Task 6 红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/state/test_builder.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.state'`。
+- 已完成一次系统化排查：问题根因不是测试代码，而是误用了系统 Python；当前项目测试应统一通过 `.venv` 解释器运行。
+- Task 6 绿测已通过：同一命令结果 `1 passed`。
+- 已补做相关回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/test_logging_setup.py I:/work/cheat/tests/state/test_builder.py -v`，结果 `4 passed`。
+- 在 Python 代码评审后补充了 Task 6 的两个测试：非 popup 的非阻塞场景，以及输入列表变更不会污染状态快照的场景。
+- 最新状态测试命令：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/state/test_builder.py -v`，结果 `3 passed`。
+- 评审中提出的“`build_state()` 共享原始列表”问题已通过测试核实为当前实现不成立：Pydantic 模型实例化时已复制列表，因此本轮未修改 `src/auto_ops/state/builder.py`。
+- 已完成 Task 7 的最小实现，新增文件：`src/auto_ops/priority/scorer.py`、`tests/priority/test_scorer.py`。
+- Task 7 红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/priority/test_scorer.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.priority'`。
+- Task 7 绿测已通过：同一命令结果 `1 passed`。
+- 已补做当前阶段回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/test_logging_setup.py I:/work/cheat/tests/detector/test_fake_detector.py I:/work/cheat/tests/capture/test_window_capture.py I:/work/cheat/tests/state/test_builder.py I:/work/cheat/tests/priority/test_scorer.py -v`，结果 `16 passed`。
+- 在 Python 代码评审后补充了 Task 7 的三个覆盖测试：`confidence` 参与排序、空输入返回 `None`、未知类别默认权重分支。
+- 最新优先级测试命令：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/priority/test_scorer.py -v`，结果 `4 passed`。
+- 评审中提出的“Task 7 没有锁住新增评分规则”问题已通过补测试修正；当前未修改 `src/auto_ops/priority/scorer.py`。
+- 已完成 Task 8 的最小实现，新增文件：`src/auto_ops/behavior_tree/nodes.py`、`src/auto_ops/behavior_tree/runner.py`、`tests/behavior_tree/test_runner.py`。
+- Task 8 红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/behavior_tree/test_runner.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.behavior_tree'`。
+- Task 8 绿测已通过：同一命令结果 `1 passed`。
+- 已补做当前阶段回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/test_logging_setup.py I:/work/cheat/tests/detector/test_fake_detector.py I:/work/cheat/tests/capture/test_window_capture.py I:/work/cheat/tests/state/test_builder.py I:/work/cheat/tests/priority/test_scorer.py I:/work/cheat/tests/behavior_tree/test_runner.py -v`，结果 `20 passed`。
+- 在 Python 代码评审后补充了 Task 8 的 `run_tree()` 测试，并将 `src/auto_ops/behavior_tree/runner.py` 从占位模块改为最小运行入口。
+- `src/auto_ops/behavior_tree/nodes.py` 已补充类型标注，并新增 `Node` 协议以约束行为树节点接口。
+- 最新行为树测试命令：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/behavior_tree/test_runner.py -v`，结果 `2 passed`。
+- 最新当前阶段回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/test_logging_setup.py I:/work/cheat/tests/detector/test_fake_detector.py I:/work/cheat/tests/capture/test_window_capture.py I:/work/cheat/tests/state/test_builder.py I:/work/cheat/tests/priority/test_scorer.py I:/work/cheat/tests/behavior_tree/test_runner.py -v`，结果 `21 passed`。
+- 已完成 Task 9 的最小实现，新增文件：`src/auto_ops/executor/base.py`、`src/auto_ops/executor/windows.py`、`tests/executor/test_windows_executor.py`。
+- Task 9 红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/executor/test_windows_executor.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.executor'`。
+- Task 9 绿测已通过：同一命令结果 `1 passed`。
+- 已补做当前阶段回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/test_logging_setup.py I:/work/cheat/tests/detector/test_fake_detector.py I:/work/cheat/tests/capture/test_window_capture.py I:/work/cheat/tests/state/test_builder.py I:/work/cheat/tests/priority/test_scorer.py I:/work/cheat/tests/behavior_tree/test_runner.py I:/work/cheat/tests/executor/test_windows_executor.py -v`，结果 `22 passed`。
+- 已完成 Task 10 的最小实现，新增文件：`src/auto_ops/orchestrator/engine.py`、`tests/orchestrator/test_engine.py`。
+- Task 10 红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/orchestrator/test_engine.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.orchestrator'`。
+- Task 10 绿测已通过：同一命令结果 `1 passed`。
+- 已补做当前阶段回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/test_logging_setup.py I:/work/cheat/tests/detector/test_fake_detector.py I:/work/cheat/tests/capture/test_window_capture.py I:/work/cheat/tests/state/test_builder.py I:/work/cheat/tests/priority/test_scorer.py I:/work/cheat/tests/behavior_tree/test_runner.py I:/work/cheat/tests/executor/test_windows_executor.py I:/work/cheat/tests/orchestrator/test_engine.py -v`，结果 `23 passed`。
+- 在 Python 代码评审后补充了 Task 10 的两个测试：空目标时 `execution is None`，以及编排层会把目标中心点规范为整数坐标再交给执行器。
+- `src/auto_ops/orchestrator/engine.py` 已将 `CycleResult` 收紧为真实模型类型，并在编排层统一处理点击坐标取整。
+- 最新编排测试命令：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/orchestrator/test_engine.py -v`，结果 `3 passed`。
+- 最新当前阶段回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/test_logging_setup.py I:/work/cheat/tests/detector/test_fake_detector.py I:/work/cheat/tests/capture/test_window_capture.py I:/work/cheat/tests/state/test_builder.py I:/work/cheat/tests/priority/test_scorer.py I:/work/cheat/tests/behavior_tree/test_runner.py I:/work/cheat/tests/executor/test_windows_executor.py I:/work/cheat/tests/orchestrator/test_engine.py -v`，结果 `25 passed`。
+- 已完成 Task 11 的最小实现，新增文件：`src/auto_ops/detector/yolo.py`、`tests/detector/test_yolo_adapter.py`。
+- Task 11 红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/detector/test_yolo_adapter.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.detector.yolo'`。
+- Task 11 首轮绿测已通过：同一命令结果 `2 passed`。
+- 在 Python / 通用代码评审后，补充了 Task 11 的三个边界测试：非法 box 长度、空检测结果、`xyxy/conf/cls` 长度不一致报错。
+- `src/auto_ops/detector/yolo.py` 已回修：`normalize_box()` 增加四元组长度校验；`YoloDetector.detect()` 增加 YOLO box 元数据长度一致性校验，避免静默截断。
+- 最新 YOLO 适配器测试命令：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/detector/test_yolo_adapter.py -v`，结果 `5 passed`。
+- 最新当前阶段回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/test_logging_setup.py I:/work/cheat/tests/detector/test_fake_detector.py I:/work/cheat/tests/detector/test_yolo_adapter.py I:/work/cheat/tests/capture/test_window_capture.py I:/work/cheat/tests/state/test_builder.py I:/work/cheat/tests/priority/test_scorer.py I:/work/cheat/tests/behavior_tree/test_runner.py I:/work/cheat/tests/executor/test_windows_executor.py I:/work/cheat/tests/orchestrator/test_engine.py -v`，结果 `30 passed`。
+- 已完成 Task 12 的最小实现，新增文件：`src/auto_ops/ui/view_model.py`、`src/auto_ops/ui/main_window.py`、`src/auto_ops/ui/app.py`、`tests/ui/test_view_model.py`、`tests/ui/test_app.py`、`tests/ui/test_main_window.py`。
+- Task 12 红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_view_model.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.ui'`。
+- Task 12 首轮绿测已通过：同一命令结果 `1 passed`。
+- 在代码评审后，补充了 Task 12 的两个 UI 引导测试：`build_ui()` 持有 `QApplication` 引用，以及导入 `auto_ops.ui.app` 不要求立即安装 `PySide6`。
+- 随后补充了 `main_window` 的两个测试：导入模块不立即依赖 `PySide6`，以及窗口会设置标题与 Ready 标签。
+- `src/auto_ops/ui/app.py` 已回修：`build_ui()` 增加 `_APP` 全局引用保活，并改为函数内延迟导入 `QApplication` 与 `MainWindow`。
+- `src/auto_ops/ui/main_window.py` 已回修为延迟导入 `PySide6` 的最小窗口工厂，避免在非 UI 环境导入模块即失败。
+- 最新 UI 测试命令：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_view_model.py I:/work/cheat/tests/ui/test_app.py I:/work/cheat/tests/ui/test_main_window.py -v`，结果 `5 passed`。
+- 最新当前阶段回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/test_logging_setup.py I:/work/cheat/tests/detector/test_fake_detector.py I:/work/cheat/tests/detector/test_yolo_adapter.py I:/work/cheat/tests/capture/test_window_capture.py I:/work/cheat/tests/state/test_builder.py I:/work/cheat/tests/priority/test_scorer.py I:/work/cheat/tests/behavior_tree/test_runner.py I:/work/cheat/tests/executor/test_windows_executor.py I:/work/cheat/tests/orchestrator/test_engine.py I:/work/cheat/tests/ui/test_view_model.py I:/work/cheat/tests/ui/test_app.py I:/work/cheat/tests/ui/test_main_window.py -v`，结果 `35 passed`。
+- 已完成 Task 13 的安全替代版实现，新增文件：`tests/orchestrator/test_preview_cycle.py`。
+- Task 13 首轮红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/ui/test_view_model.py I:/work/cheat/tests/orchestrator/test_preview_cycle.py -v` 首次失败，错误为 `ImportError: cannot import name 'preview_cycle' from 'auto_ops.orchestrator.engine'`。
+- Task 13 首轮绿测已通过：同一命令结果 `4 passed`。
+- 在评审后补充了两个安全约束测试：未知 `mode` 配置会被拒绝，以及 `run_cycle(..., observe_only=True)` 不触发执行器。
+- `src/auto_ops/config/models.py` 已回修：`SceneConfig.mode` 从自由字符串收紧为 `Literal["observe_only"]`。
+- `src/auto_ops/ui/view_model.py` 已新增 `observe_only` 字段，默认 `True`。
+- `src/auto_ops/orchestrator/engine.py` 已新增 `PreviewCycleResult` / `preview_cycle()`，并让 `run_cycle()` 在 `observe_only=True` 时跳过执行器调用。
+- `strategies/scenes/browser_demo.yaml` 已补充 `mode: observe_only`。
+- 最新安全版 Task 13 测试命令：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/orchestrator/test_preview_cycle.py I:/work/cheat/tests/ui/test_view_model.py -v`，结果 `6 passed`。
+- 最新当前阶段回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/test_logging_setup.py I:/work/cheat/tests/detector/test_fake_detector.py I:/work/cheat/tests/detector/test_yolo_adapter.py I:/work/cheat/tests/capture/test_window_capture.py I:/work/cheat/tests/state/test_builder.py I:/work/cheat/tests/priority/test_scorer.py I:/work/cheat/tests/behavior_tree/test_runner.py I:/work/cheat/tests/executor/test_windows_executor.py I:/work/cheat/tests/orchestrator/test_engine.py I:/work/cheat/tests/orchestrator/test_preview_cycle.py I:/work/cheat/tests/ui/test_view_model.py I:/work/cheat/tests/ui/test_app.py I:/work/cheat/tests/ui/test_main_window.py -v`，结果 `40 passed`。
+- 已完成 Task 14 的安全版验证收口，新增文件：`tests/orchestrator/test_priority_and_state_integration.py`。
+- Task 14 红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/orchestrator/test_priority_and_state_integration.py -v` 首次失败，错误为 `AttributeError: 'PreviewCycleResult' object has no attribute 'has_blocking_target'`。
+- `src/auto_ops/orchestrator/engine.py` 已回修：`PreviewCycleResult` 新增 `has_blocking_target` 字段，`preview_cycle()` 在有目标和无目标分支都会回填该状态摘要。
+- 最新 Task 14 集成测试命令：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/orchestrator/test_preview_cycle.py I:/work/cheat/tests/orchestrator/test_priority_and_state_integration.py -v`，结果 `4 passed`。
+- 最新当前阶段回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/test_logging_setup.py I:/work/cheat/tests/detector/test_fake_detector.py I:/work/cheat/tests/detector/test_yolo_adapter.py I:/work/cheat/tests/capture/test_window_capture.py I:/work/cheat/tests/state/test_builder.py I:/work/cheat/tests/priority/test_scorer.py I:/work/cheat/tests/behavior_tree/test_runner.py I:/work/cheat/tests/executor/test_windows_executor.py I:/work/cheat/tests/orchestrator/test_engine.py I:/work/cheat/tests/orchestrator/test_preview_cycle.py I:/work/cheat/tests/orchestrator/test_priority_and_state_integration.py I:/work/cheat/tests/ui/test_view_model.py I:/work/cheat/tests/ui/test_app.py I:/work/cheat/tests/ui/test_main_window.py -v`，结果 `41 passed`。
+- 已完成 Task 33 的 UI preview 展示收口：`src/auto_ops/ui/view_model.py` 新增 preview 摘要字段，`src/auto_ops/ui/main_window.py` 新增预览文案渲染，`src/auto_ops/ui/app.py` 新增 `build_ui(state)` 状态透传。
+- Task 33 红测过程已验证：`I:/work/cheat/tests/ui/test_app.py` 新增 `test_build_ui_passes_state_to_window` 后，旧实现报错 `TypeError: build_ui() takes 0 positional arguments but 1 was given`。
+- Task 33 针对性验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_app.py -v`，结果 `3 passed`。
+- Task 33 UI 回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui -v`，结果 `9 passed`。
+- 最新全量回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests -v`，结果 `44 passed`。
+- 已完成 Task 34 的 preview→UiState 组装：`src/auto_ops/ui/view_model.py` 新增 `build_ui_state()`，用于把 `PreviewCycleResult` 转成 `UiState`。
+- Task 34 首轮红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_view_model.py -v` 初次因缺少 `build_ui_state` 报错 `ImportError: cannot import name 'build_ui_state'`。
+- 根据评审补充红测后，再次验证出静默吞错问题：同一命令中 `test_build_ui_state_rejects_wrong_preview_object` 失败，原因为当前实现未抛出 `AttributeError`。
+- `src/auto_ops/ui/view_model.py` 已回修：去掉 `getattr(..., default)` 的静默降级，改为在 `preview is not None` 时直接读取 `planned_action`、`planned_point`、`has_blocking_target`。
+- Task 34 针对性验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_view_model.py -v`，结果 `7 passed`。
+- Task 34 UI 回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui -v`，结果 `13 passed`。
+- 最新全量回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests -v`，结果 `48 passed`。
+- 已完成 Task 35 的窗口最小刷新入口：`src/auto_ops/ui/main_window.py` 提取 `_build_label_text()` 并新增 `update_state()`，窗口可在创建后刷新 preview 文案。
+- Task 35 红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_main_window.py -v` 初次失败，错误为 `AttributeError: '_MainWindow' object has no attribute 'update_state'`。
+- Task 35 针对性验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_main_window.py -v`，结果 `4 passed`。
+- 已完成 Task 36 的只读启动预览链路：`src/auto_ops/app.py` 新增只读 `PreviewCapture` 与默认场景加载，主入口会生成 preview 状态并调用 UI 启动入口。
+- Task 36 首轮红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py -v` 初次失败，错误为 `TypeError: main() takes 0 positional arguments but 1 was given`。
+- 评审后补充了 UI 事件循环红测：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_app.py -v` 初次失败，错误为 `AttributeError: module 'auto_ops.ui.app' has no attribute 'run_ui'`。
+- `src/auto_ops/ui/app.py` 已回修：新增 `run_ui()`，在创建窗口后调用 `_APP.exec()` 进入 Qt 事件循环。
+- `src/auto_ops/app.py` 已回修：主入口改为调用 `run_ui(state)`，并把默认场景路径收敛为基于源码位置解析，避免依赖当前工作目录。
+- Task 36 针对性验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py -v`，结果 `2 passed`。
+- Task 36 UI 回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui -v`，结果 `15 passed`。
+- 最新全量回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests -v`，结果 `51 passed`。
+- 已完成 Task 37 的默认演示 preview：`src/auto_ops/app.py` 默认启动时改为注入一条 `primary_button` 演示检测种子，避免 UI 只显示 `Ready`。
+- Task 37 红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py -v` 中 `test_main_uses_demo_preview_by_default` 初次失败，错误为 `AssertionError: assert None == 'click'`。
+- Task 37 针对性验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py -v`，结果 `3 passed`。
+- Task 37 UI 回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui -v`，结果 `15 passed`。
+- 最新全量回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests -v`，结果 `52 passed`。
+- 已完成 Task 38 的只读启动链路稳定性加固：默认 demo 场景改为包内资源加载，UI 启动器新增主窗口引用保活。
+- Task 38 红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_app.py -q` 初次失败，错误为 `AssertionError: assert None is not None`，表明 `_WINDOW` 引用尚未持有。
+- Task 38 红测已验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py -q` 初次失败，错误为 `AssertionError: assert WindowsPath('I:/work/cheat/strategies/scenes/browser_demo.yaml') == WindowsPath('virtual/browser_demo.yaml')`，表明默认场景仍依赖源码路径。
+- `src/auto_ops/ui/app.py` 已回修：新增 `_WINDOW` 全局引用，`build_ui()` 返回并持有同一个主窗口实例。
+- `src/auto_ops/app.py` 已回修：默认场景改为 `importlib.resources.files("auto_ops").joinpath("resources/browser_demo.yaml")` 配合 `as_file(...)` 加载，并抽出 `_run_with_scene(scene_path)` 复用显式/默认场景启动路径。
+- `pyproject.toml` 已回修：新增 `[tool.setuptools.package-data] auto_ops = ["resources/*.yaml"]`。
+- Task 38 针对性验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_app.py -q`，结果 `5 passed`。
+- Task 38 针对性验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py -q`，结果 `4 passed`。
+- Task 38 源码环境资源解析验证：`PYTHONPATH="I:/work/cheat/src" "I:/work/cheat/.venv/Scripts/python.exe" -c "from importlib.resources import as_file, files; from pathlib import Path; resource = files('auto_ops').joinpath('resources/browser_demo.yaml'); ctx = as_file(resource); path = ctx.__enter__(); print(Path(path).name); print(Path(path).exists()); ctx.__exit__(None, None, None)"`，输出为 `browser_demo.yaml` 与 `True`。
+- 最新全量回归验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests -q`，结果 `54 passed`。

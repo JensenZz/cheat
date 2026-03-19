@@ -1,3 +1,6 @@
+import pytest
+from pydantic import ValidationError
+
 from auto_ops.config.loader import load_scene
 
 
@@ -8,6 +11,7 @@ def test_load_scene_returns_parsed_models(tmp_path):
 scene:
   id: browser-demo
   name: Browser Demo
+  mode: observe_only
   window_match:
     title_contains: ["Demo"]
   capture_config:
@@ -24,4 +28,26 @@ scene:
     scene = load_scene(config)
 
     assert scene.scene.id == "browser-demo"
+    assert scene.scene.mode == "observe_only"
     assert scene.targets[0].class_name == "primary_button"
+
+
+
+def test_load_scene_rejects_unknown_mode(tmp_path):
+    config = tmp_path / "scene.yaml"
+    config.write_text(
+        """
+scene:
+  id: browser-demo
+  name: Browser Demo
+  mode: auto
+  window_match:
+    title_contains: ["Demo"]
+  capture_config:
+    fps: 2
+""".strip(),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValidationError, match="observe_only"):
+        load_scene(config)

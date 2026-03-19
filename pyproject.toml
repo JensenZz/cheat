@@ -25,6 +25,9 @@ app = [
 [tool.setuptools]
 package-dir = {"" = "src"}
 
+[tool.setuptools.package-data]
+auto_ops = ["resources/*.yaml"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
