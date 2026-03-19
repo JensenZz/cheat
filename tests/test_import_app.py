@@ -30,7 +30,11 @@ def test_main_builds_preview_ui_state(monkeypatch):
         "SceneBundleStub",
         (),
         {
-            "scene": type("SceneStub", (), {"id": "browser-demo"})(),
+            "scene": type(
+                "SceneStub",
+                (),
+                {"id": "browser-demo", "mode": "preview", "executor_backend": "standard", "window_match": type("WindowMatchStub", (), {"title_contains": ["Demo"]})()},
+            )(),
             "targets": [type("TargetStub", (), {"class_name": "primary_button", "weight": 80})()],
         },
     )(), raising=False)
@@ -57,6 +61,8 @@ def test_main_builds_preview_ui_state(monkeypatch):
 
     assert result == 0
     assert captured["state"].selected_scene == "browser-demo"
+    assert captured["state"].mode == "preview"
+    assert captured["state"].executor_backend == "standard"
     assert captured["state"].preview_action == "click"
 
 
@@ -76,8 +82,102 @@ def test_main_uses_demo_preview_by_default(monkeypatch):
 
     assert result == 0
     assert captured["state"].selected_scene == "browser-demo"
+    assert captured["state"].mode == "preview"
+    assert captured["state"].executor_backend == "standard"
     assert captured["state"].preview_action == "click"
     assert captured["state"].preview_point == (30, 20)
+
+
+
+def test_main_uses_run_cycle_with_dry_run_executor(monkeypatch):
+    app_module = import_module("auto_ops.app")
+    captured = {}
+
+    monkeypatch.setattr(app_module, "load_scene", lambda path: type(
+        "SceneBundleStub",
+        (),
+        {
+            "scene": type(
+                "SceneStub",
+                (),
+                {"id": "browser-demo", "mode": "dry_run", "executor_backend": "standard", "window_match": type("WindowMatchStub", (), {"title_contains": ["Demo"]})()},
+            )(),
+            "targets": [type("TargetStub", (), {"class_name": "primary_button", "weight": 80})()],
+        },
+    )(), raising=False)
+
+    def fake_run_cycle(capture, detector, executor, weights, mode):
+        captured["mode"] = mode
+        captured["dry_run"] = executor.dry_run
+        return type(
+            "CycleStub",
+            (),
+            {
+                "selected_target": type("TargetStub", (), {"center": (30, 20)})(),
+                "execution": type("ExecutionStub", (), {"action": "click"})(),
+                "planned_action": "click",
+                "planned_point": (30, 20),
+                "has_blocking_target": False,
+            },
+        )()
+
+    monkeypatch.setattr(app_module, "run_cycle", fake_run_cycle, raising=False)
+    monkeypatch.setattr(app_module, "preview_cycle", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("preview_cycle should not run in dry_run mode")), raising=False)
+    monkeypatch.setattr(app_module, "run_ui", lambda state: 0, raising=False)
+    monkeypatch.setattr(app_module, "FakeDetector", lambda seeded: object(), raising=False)
+    monkeypatch.setattr(app_module, "PreviewCapture", FakeCapture, raising=False)
+
+    result = app_module.main(Path("strategies/scenes/browser_demo.yaml"))
+
+    assert result == 0
+    assert captured["mode"] == "dry_run"
+    assert captured["dry_run"] is True
+
+
+
+def test_main_uses_run_cycle_with_live_executor(monkeypatch):
+    app_module = import_module("auto_ops.app")
+    captured = {}
+
+    monkeypatch.setattr(app_module, "load_scene", lambda path: type(
+        "SceneBundleStub",
+        (),
+        {
+            "scene": type(
+                "SceneStub",
+                (),
+                {"id": "browser-demo", "mode": "live", "executor_backend": "standard", "window_match": type("WindowMatchStub", (), {"title_contains": ["Demo"]})()},
+            )(),
+            "targets": [type("TargetStub", (), {"class_name": "primary_button", "weight": 80})()],
+        },
+    )(), raising=False)
+
+    def fake_run_cycle(capture, detector, executor, weights, mode):
+        captured["mode"] = mode
+        captured["dry_run"] = executor.dry_run
+        return type(
+            "CycleStub",
+            (),
+            {
+                "selected_target": type("TargetStub", (), {"center": (30, 20)})(),
+                "execution": type("ExecutionStub", (), {"action": "click"})(),
+                "planned_action": "click",
+                "planned_point": (30, 20),
+                "has_blocking_target": False,
+            },
+        )()
+
+    monkeypatch.setattr(app_module, "run_cycle", fake_run_cycle, raising=False)
+    monkeypatch.setattr(app_module, "preview_cycle", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("preview_cycle should not run in live mode")), raising=False)
+    monkeypatch.setattr(app_module, "run_ui", lambda state: 0, raising=False)
+    monkeypatch.setattr(app_module, "FakeDetector", lambda seeded: object(), raising=False)
+    monkeypatch.setattr(app_module, "PreviewCapture", FakeCapture, raising=False)
+
+    result = app_module.main(Path("strategies/scenes/browser_demo.yaml"))
+
+    assert result == 0
+    assert captured["mode"] == "live"
+    assert captured["dry_run"] is False
 
 
 
@@ -103,7 +203,11 @@ def test_main_loads_default_scene_from_package_resource(monkeypatch):
             "SceneBundleStub",
             (),
             {
-                "scene": type("SceneStub", (), {"id": "browser-demo"})(),
+                "scene": type(
+                    "SceneStub",
+                    (),
+                    {"id": "browser-demo", "mode": "preview", "executor_backend": "standard", "window_match": type("WindowMatchStub", (), {"title_contains": ["Demo"]})()},
+                )(),
                 "targets": [type("TargetStub", (), {"class_name": "primary_button", "weight": 80})()],
             },
         )()
@@ -136,3 +240,5 @@ def test_main_loads_default_scene_from_package_resource(monkeypatch):
     assert result == 0
     assert captured["scene_path"] == resource_path
     assert captured["state"].selected_scene == "browser-demo"
+    assert captured["state"].mode == "preview"
+    assert captured["state"].executor_backend == "standard"

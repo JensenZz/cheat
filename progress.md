@@ -1,5 +1,14 @@
 # 进度记录
 
+## 2026-03-19
+- 按 executing-plans / using-git-worktrees 流程执行本轮实现，先将原目录未提交工作整理到 `wip/full-pipeline-baseline-20260319`，再创建隔离 worktree：`I:/work/cheat/.worktrees/full-pipeline-phase0-1`。
+- 修复仓库卫生：`.worktrees/` 已加入 `.gitignore`，避免项目内 worktree 污染版本控制。
+- 在隔离 worktree 中跑基线测试：`I:/work/cheat/.venv/Scripts/python.exe -m pytest -q`，结果 `54 passed`。
+- 按 TDD 先补红测，新增/调整了配置模式、UI 状态、主窗口文案、编排模式参数、应用启动状态透传相关测试；首轮红测结果为 `12 failed, 10 passed`，失败点集中在旧的 `observe_only` 假设。
+- 已完成 Phase 0 第一批最小实现：`SceneConfig.mode` 切换为 `preview / dry_run / live`，新增 `executor_backend / ocr_backend / window_policy / multi_window / emulator_type`；`UiState`、`build_ui_state()`、`run_cycle()`、`app.py`、demo 场景资源已同步到显式 `mode + backend` 语义。
+- Phase 0 第一批针对性绿测：`I:/work/cheat/.venv/Scripts/python.exe -m pytest tests/config/test_loader.py tests/ui/test_view_model.py tests/ui/test_main_window.py tests/orchestrator/test_preview_cycle.py tests/test_import_app.py -q`，结果 `22 passed`。
+- 已同步更新项目记忆，移除“只读 preview 是最终方向”的过期信息，替换为“分阶段全流程研究型自动化平台”。
+
 ## 2026-03-18
 - 创建任务清单，按“探索上下文 → 澄清需求 → 提出方案 → 设计确认 → 写文档 → 转实施计划”的流程推进。
 - 发现当前项目目录为空，暂无已有代码、配置或文档。

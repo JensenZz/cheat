@@ -20,21 +20,28 @@ def test_ui_state_tracks_selected_scene():
 
 
 
-def test_ui_state_defaults_to_observe_only():
+def test_ui_state_defaults_to_preview_mode():
     state = UiState(selected_scene="browser-demo")
 
-    assert state.observe_only is True
+    assert state.mode == "preview"
+    assert state.can_execute is False
+    assert state.executor_backend == "standard"
 
 
 
 def test_ui_state_tracks_preview_summary():
     state = UiState(
         selected_scene="browser-demo",
+        mode="dry_run",
+        can_execute=True,
+        executor_backend="standard",
         preview_action="click",
         preview_point=(30, 20),
         has_blocking_target=True,
     )
 
+    assert state.mode == "dry_run"
+    assert state.can_execute is True
     assert state.preview_action == "click"
     assert state.preview_point == (30, 20)
     assert state.has_blocking_target is True
@@ -50,7 +57,9 @@ def test_build_ui_state_maps_preview_cycle_result_to_ui_state():
     state = build_ui_state(selected_scene="browser-demo", preview=preview)
 
     assert state.selected_scene == "browser-demo"
-    assert state.observe_only is True
+    assert state.mode == "preview"
+    assert state.can_execute is False
+    assert state.executor_backend == "standard"
     assert state.preview_action == "click"
     assert state.preview_point == (30, 20)
     assert state.has_blocking_target is False
@@ -61,7 +70,9 @@ def test_build_ui_state_defaults_when_preview_is_none():
     state = build_ui_state(selected_scene="browser-demo")
 
     assert state.selected_scene == "browser-demo"
-    assert state.observe_only is True
+    assert state.mode == "preview"
+    assert state.can_execute is False
+    assert state.executor_backend == "standard"
     assert state.preview_action is None
     assert state.preview_point is None
     assert state.has_blocking_target is False

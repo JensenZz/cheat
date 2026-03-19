@@ -8,7 +8,8 @@ def _build_label_text(state) -> str:
 
     blocking = "yes" if state.has_blocking_target else "no"
     return (
-        f"Mode: {'observe_only' if state.observe_only else 'active'} | "
+        f"Mode: {state.mode} | "
+        f"Backend: {state.executor_backend} | "
         f"Scene: {state.selected_scene} | "
         f"Blocking: {blocking} | "
         f"Planned: {state.preview_action} @{state.preview_point}"
