@@ -1,0 +1,9 @@
+scene_id: browser-demo
+classes:
+  - primary_button
+output_dir: artifacts/models/browser_demo
+base_model: models/yolo11n.pt
+dataset:
+  root_dir: artifacts/datasets/browser_demo
+  train_split: train
+  val_split: val

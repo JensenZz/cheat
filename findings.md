@@ -45,6 +45,12 @@
 - 当前平台策略明确：真实窗口绑定、标准输入、模拟器、底层驱动都必须保持 Windows-only 插件化与延迟导入，不破坏 Mac 上的纯逻辑开发与测试。
 - Phase 0 第一批实现已落地：`SceneConfig` 已支持 `preview / dry_run / live`，并新增 `executor_backend`、`ocr_backend`、`window_policy`、`multi_window`、`emulator_type` 等字段。
 - 当前 `UiState` / `build_ui_state()` / `run_cycle()` / `app.py` 已切换为显式 `mode + backend` 语义；`browser_demo.yaml` 与包内默认场景当前默认使用 `mode: preview` 与 `executor_backend: standard`。
+- Phase 1 本轮切片已完成：`src/auto_ops/app.py` 当前通过 `_build_capture()` / `_build_detector()` 按 scene 配置组装 `preview|windows` capture 与 `fake|yolo` detector，不再写死 `PreviewCapture + FakeDetector`。
+- `src/auto_ops/app.py` 当前 `YOLO` 路径继续保持延迟导入：仅在 `detector_backend == "yolo"` 时才加载 `ultralytics.YOLO(...)`，导入 `auto_ops.app` 本身不要求安装 ultralytics。
+- `src/auto_ops/capture/windows.py` 当前已新增 `WindowsCapture`，可按 `window_match.title_contains` 定位首个匹配的可见窗口，并使用 `mss` 抓取窗口区域。
+- `WindowsCapture.grab()` 当前会把 `mss` 的 BGRA 原始帧规范化为 RGB `numpy.ndarray`，使其可直接作为 YOLO 输入，避免把 `ScreenShot` 原始对象直接透传给检测层。
+- 当前配置校验已补齐两条关键边界：`detector_backend == "yolo"` 时必须同时满足 `detector_model` 非空且 `capture_backend == "windows"`。
+- 当前 `WindowMatch.title_contains` 已从“可空列表”收紧为“至少一个非空关键字”，避免真实窗口链路在漏配时退化为抓取任意首个可见窗口。
 - Task 1 已落地文件：`pyproject.toml`、`src/auto_ops/__init__.py`、`tests/conftest.py`、`tests/test_import_app.py`。
 - 当前环境中的 `python` / `python3` 都指向 WindowsApps 占位入口，不是可用解释器。
 - 进一步确认这两个入口实际都链接到 `AppInstallerPythonRedirector.exe`，说明系统当前只是安装了 Microsoft Store 的 Python 重定向器，并没有发现真实 Python 解释器。

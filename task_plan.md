@@ -9,6 +9,9 @@
 - 项目方向已从“只读 preview 收口”切换为“分阶段推进的全流程研究型自动化工程”。
 - 当前已完成 Phase 0 第一批落地：配置层支持 `preview / dry_run / live`，并新增 `executor_backend / ocr_backend / window_policy / multi_window / emulator_type` 等字段。
 - 当前 UI / 应用启动 / 编排骨架已切换到显式 `mode + backend` 语义，默认 demo 场景改为 `preview` 安全启动，但不再把只读链路视为终点。
+- 当前已完成 Phase 1 本轮切片：`app.py` 不再写死 `PreviewCapture + FakeDetector`，而是按 scene 配置切换 `capture_backend / detector_backend`，可在 `preview / dry_run / live` 下统一组装后端。
+- 当前已完成真实窗口截图接入：`src/auto_ops/capture/windows.py` 新增 `WindowsCapture`，支持按 `window_match.title_contains` 定位窗口、截图并输出统一 `WindowSnapshot`。
+- 当前已完成本轮边界收口：`yolo` 后端要求 `capture_backend='windows'` 且必须提供 `detector_model`；`window_match.title_contains` 现在必须提供至少一个非空关键字，避免误抓任意可见窗口。
 - 默认 demo 场景仍通过包内资源加载，UI 启动器继续持有主窗口引用，保留已有启动稳定性加固结果。
 - Task 12 已完成：PySide6 UI MVP 骨架已落地，并补齐可选依赖延迟导入与启动保活验证。
 - Task 11 已完成：YOLO 适配器与检测结果标准化已落地，并完成边界测试与当前阶段回归验证。

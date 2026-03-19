@@ -3,8 +3,10 @@ from __future__ import annotations
 from importlib.resources import as_file, files
 from pathlib import Path
 
+from auto_ops.capture.windows import WindowsCapture
 from auto_ops.config.loader import load_scene
 from auto_ops.detector.fake import FakeDetector
+from auto_ops.detector.yolo import YoloDetector
 from auto_ops.executor.windows import WindowsExecutor
 from auto_ops.logging import build_logger
 from auto_ops.orchestrator.engine import preview_cycle, run_cycle
@@ -17,6 +19,30 @@ class PreviewCapture:
         from auto_ops.capture.windows import WindowSnapshot
 
         return WindowSnapshot(title="Preview", region=(0, 0, 800, 600), image=None)
+
+
+
+def _build_capture(scene):
+    if scene.capture_backend == "windows":
+        return WindowsCapture(scene.window_match)
+    return PreviewCapture()
+
+
+
+def _build_detector(scene):
+    if scene.detector_backend == "yolo":
+        model = YOLO(scene.detector_model)
+        return YoloDetector(model)
+    return FakeDetector([
+        {"class_name": "primary_button", "confidence": 0.9, "bbox": (10, 10, 50, 30)},
+    ])
+
+
+
+def YOLO(model_path: str):
+    from ultralytics import YOLO as UltralyticsYOLO
+
+    return UltralyticsYOLO(model_path)
 
 
 
@@ -35,10 +61,8 @@ def main(scene_path: Path | None = None) -> int:
 def _run_with_scene(scene_path: Path) -> int:
     scene_bundle = load_scene(scene_path)
     weights = {target.class_name: target.weight for target in scene_bundle.targets}
-    capture = PreviewCapture()
-    detector = FakeDetector([
-        {"class_name": "primary_button", "confidence": 0.9, "bbox": (10, 10, 50, 30)},
-    ])
+    capture = _build_capture(scene_bundle.scene)
+    detector = _build_detector(scene_bundle.scene)
 
     if scene_bundle.scene.mode == "preview":
         preview = preview_cycle(capture, detector, weights)

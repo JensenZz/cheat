@@ -8,6 +8,16 @@
 - 已完成 Phase 0 第一批最小实现：`SceneConfig.mode` 切换为 `preview / dry_run / live`，新增 `executor_backend / ocr_backend / window_policy / multi_window / emulator_type`；`UiState`、`build_ui_state()`、`run_cycle()`、`app.py`、demo 场景资源已同步到显式 `mode + backend` 语义。
 - Phase 0 第一批针对性绿测：`I:/work/cheat/.venv/Scripts/python.exe -m pytest tests/config/test_loader.py tests/ui/test_view_model.py tests/ui/test_main_window.py tests/orchestrator/test_preview_cycle.py tests/test_import_app.py -q`，结果 `22 passed`。
 - 已同步更新项目记忆，移除“只读 preview 是最终方向”的过期信息，替换为“分阶段全流程研究型自动化平台”。
+- 在 `I:/work/cheat/.worktrees/full-pipeline-phase0-1` 继续推进 Phase 1 最小真实链路切片，先承接上次未收口的半成品：`src/auto_ops/app.py`、`src/auto_ops/capture/windows.py`、`src/auto_ops/config/models.py`、`tests/config/test_loader.py`、`tests/test_import_app.py`、`tests/capture/test_windows_capture.py` 已存在未提交修改。
+- 本轮首先确认现状：针对性测试 `tests/config/test_loader.py`、`tests/capture/test_windows_capture.py`、`tests/test_import_app.py` 均通过，说明后端切换主干已落地；但代码审查指出两处阻塞问题：1) `preview + yolo` 非法组合未被限制；2) `WindowsCapture.grab()` 仍直接返回 `mss` 原始帧对象，不足以稳定作为 YOLO 输入。
+- 按 TDD 新增红测：`tests/config/test_loader.py` 新增 `test_load_scene_rejects_preview_capture_with_yolo_backend`；`tests/capture/test_windows_capture.py` 新增 `test_windows_capture_grab_normalizes_mss_frame_to_rgb_array`。两条测试均先失败，分别暴露配置约束缺失与图像格式未规范化问题。
+- 最小实现回修：`src/auto_ops/config/models.py` 新增校验——`detector_backend == "yolo"` 时要求 `capture_backend == "windows"`；`src/auto_ops/capture/windows.py` 新增 `_normalize_image()`，把 `mss` BGRA 帧转换为 RGB `numpy.ndarray` 后再写入 `WindowSnapshot.image`。
+- 回修后针对性验证：`tests/config/test_loader.py` → `5 passed`，`tests/capture/test_windows_capture.py` → `5 passed`，`tests/test_import_app.py` → `11 passed`，`tests/detector/test_yolo_adapter.py` → `5 passed`。
+- 第二轮代码审查又指出一个高风险边界：`title_contains` 为空时会退化为抓取任意首个可见窗口。继续按 TDD 补红测：`tests/config/test_loader.py` 新增 `test_load_scene_requires_non_empty_window_title_keywords`，先失败；`tests/capture/test_windows_capture.py` 新增 `test_windows_capture_rejects_empty_title_keywords`，验证 capture 层已具备错误路径。
+- 最小实现回修：`src/auto_ops/config/models.py` 中 `WindowMatch.title_contains` 新增字段校验，要求至少包含一个非空关键字，并自动裁剪空白字符串。
+- 最终针对性验证：`tests/config/test_loader.py` → `6 passed`，`tests/capture/test_windows_capture.py` → `6 passed`，`tests/test_import_app.py` → `11 passed`。
+- 本轮全量回归：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/.worktrees/full-pipeline-phase0-1/tests -q`，结果 `72 passed`。
+- 本轮收口结论：Phase 1 当前已稳定支持按配置切换 `capture_backend / detector_backend`，并收紧了真实 `windows + yolo` 单窗口链路的两个关键安全边界，可继续进入下一切片。
 
 ## 2026-03-18
 - 创建任务清单，按“探索上下文 → 澄清需求 → 提出方案 → 设计确认 → 写文档 → 转实施计划”的流程推进。

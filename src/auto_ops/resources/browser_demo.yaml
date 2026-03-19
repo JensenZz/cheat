@@ -2,6 +2,9 @@ scene:
   id: browser-demo
   name: Browser Demo
   mode: preview
+  capture_backend: preview
+  detector_backend: fake
+  detector_model: null
   executor_backend: standard
   ocr_backend: none
   window_policy: focused
