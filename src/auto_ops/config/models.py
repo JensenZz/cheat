@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -19,6 +21,7 @@ class TargetRule(BaseModel):
 class SceneConfig(BaseModel):
     id: str
     name: str
+    mode: Literal["observe_only"] = "observe_only"
     window_match: WindowMatch
     capture_config: CaptureConfig
 

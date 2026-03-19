@@ -65,3 +65,90 @@
 - Task 5 代码质量回修后，`WindowSnapshot` 已改为 `@dataclass(frozen=True)`，并将 `image` 字段从 `Any` 收窄为 `object`，使其更适合作为跨模块共享的不可变快照值对象。
 - `Detection` 现已补充 `confidence` 范围校验，要求输入必须位于 `[0.0, 1.0]`；对应非法置信度测试已补齐。
 - Task 5 相关独立验证命令 `python3 -m pytest tests/detector/test_fake_detector.py tests/capture/test_window_capture.py -v` 当前结果为 `9 passed`，可作为继续 Task 6 的最新证据。
+- Task 6 已新增页面状态建模文件：`src/auto_ops/state/builder.py`、`tests/state/test_builder.py`。
+- Task 6 红测已在项目 `.venv` 中验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/state/test_builder.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.state'`。
+- 本次排查确认：系统 Python 3.11 可用，但未安装 `pytest`；后续测试应统一使用项目 `.venv` 解释器，避免把环境问题误判为代码失败。
+- Task 6 最小实现当前通过 `build_state(detections)` 识别 `class_name` 以 `popup` 开头的目标为阻塞目标，并生成 `RuntimeState`。
+- Task 6 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/test_logging_setup.py I:/work/cheat/tests/state/test_builder.py -v` 为 `4 passed`。
+- Task 6 补充评审验证后，`tests/state/test_builder.py` 已覆盖非 popup 的非阻塞路径与状态快照输入隔离；当前结果为 `3 passed`。
+- 额外验证表明：`RuntimeState(BaseModel)` 在当前 Pydantic 行为下会复制传入列表，`build_state()` 不会与调用方共享同一个 `detections` 列表对象，因此本轮无需修改 `src/auto_ops/state/builder.py`。
+- Task 7 已新增优先级评分文件：`src/auto_ops/priority/scorer.py`、`tests/priority/test_scorer.py`。
+- Task 7 红测已在项目 `.venv` 中验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/priority/test_scorer.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.priority'`。
+- Task 7 当前最小评分规则为：`score_target = class weight + confidence`；`pick_best_target()` 在目标为空时返回 `None`，否则返回分数最高的目标。
+- Task 7 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/priority/test_scorer.py -v` 为 `1 passed`；合并当前回归测试后结果为 `16 passed`。
+- Task 7 在代码评审后补充了 3 个测试：同权重下由 `confidence` 决定排序、空目标列表返回 `None`、未知类别按默认权重 `0` 计分；当前优先级测试结果已更新为 `4 passed`。
+- 本轮评审验证结果表明：当前 `score_target()` 与 `pick_best_target()` 已满足最小实现要求，问题在于原测试覆盖不足，因此本轮未修改 `src/auto_ops/priority/scorer.py`。
+- Task 8 已新增行为树文件：`src/auto_ops/behavior_tree/nodes.py`、`src/auto_ops/behavior_tree/runner.py`、`tests/behavior_tree/test_runner.py`。
+- Task 8 红测已在项目 `.venv` 中验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/behavior_tree/test_runner.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.behavior_tree'`。
+- Task 8 当前最小行为树节点包括 `ConditionNode`、`ActionNode`、`SequenceNode`；`SequenceNode.tick()` 会在子节点返回假值时立刻中止并返回 `False`。
+- 在代码评审后，`nodes.py` 已补充公开接口类型标注，并新增 `Node` 协议用于约束 `tick(state) -> bool`。
+- `src/auto_ops/behavior_tree/runner.py` 已从占位模块补齐为最小运行入口，当前提供 `run_tree(root, state)`，其行为是直接调用根节点的 `tick()`。
+- Task 8 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/behavior_tree/test_runner.py -v` 已更新为 `2 passed`；合并当前回归测试后结果为 `21 passed`。
+- Task 9 已新增执行器文件：`src/auto_ops/executor/base.py`、`src/auto_ops/executor/windows.py`、`tests/executor/test_windows_executor.py`。
+- Task 9 红测已在项目 `.venv` 中验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/executor/test_windows_executor.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.executor'`。
+- Task 9 当前最小执行结果模型为 `ExecutionResult(action, ok, performed, detail)`；`WindowsExecutor.click()` 在 `dry_run=True` 时只返回模拟结果，不执行真实点击。
+- `src/auto_ops/executor/windows.py` 当前对 `pyautogui` 使用函数内延迟导入，保持非 dry-run 路径之外的环境导入成本最低，也更符合 Mac / Windows 隔离约束。
+- Task 9 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/executor/test_windows_executor.py -v` 为 `1 passed`；合并当前回归测试后结果为 `22 passed`。
+- Task 10 已新增编排文件：`src/auto_ops/orchestrator/engine.py`、`tests/orchestrator/test_engine.py`。
+- Task 10 红测已在项目 `.venv` 中验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/orchestrator/test_engine.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.orchestrator'`。
+- Task 10 当前最小编排流程为：抓取快照 → 运行检测 → 构建状态 → 选择目标 → 对目标中心点执行点击；若无目标则返回 `execution=None`。
+- 在代码评审后，`CycleResult` 已收紧为真实模型类型：`selected_target: Detection | None`、`execution: ExecutionResult | None`。
+- 编排层当前会把 `Detection.center` 规范为 `tuple[int, int]` 后再传给执行器，修复了检测层与执行层之间的坐标类型不一致问题。
+- `tests/orchestrator/test_engine.py` 已补充空目标分支与整数点击点测试；当前编排测试结果已更新为 `3 passed`。
+- Task 10 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/orchestrator/test_engine.py -v` 为 `3 passed`；合并当前回归测试后结果为 `25 passed`。
+- Task 11 已新增真实 YOLO 适配器文件：`src/auto_ops/detector/yolo.py`、`tests/detector/test_yolo_adapter.py`。
+- Task 11 首轮红测已在项目 `.venv` 中验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/detector/test_yolo_adapter.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.detector.yolo'`。
+- Task 11 当前最小适配器实现包括：`normalize_box()` 把 YOLO `xyxy` 浮点框规范为整数四元组；`YoloDetector.detect()` 负责读取 `result.boxes.xyxy/conf/cls` 与 `result.names`，并转换为 `Detection` 模型列表。
+- 在代码评审后，`normalize_box()` 已补充显式长度校验，非法输入会抛出 `ValueError("box must contain exactly 4 values")`。
+- 在进一步评审回修后，`YoloDetector.detect()` 已补充 `xyxy/conf/cls` 长度一致性校验，避免 `zip(...)` 对异常模型输出发生静默截断；长度不一致时会抛出 `ValueError("yolo box data lengths must match")`。
+- `tests/detector/test_yolo_adapter.py` 当前已覆盖：box 整数规范化、模型入参传递、Detection 转换、非法 box 长度、空检测结果、长度不一致报错。
+- Task 11 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/detector/test_yolo_adapter.py -v` 为 `5 passed`；合并当前回归测试后结果为 `30 passed`。
+- Task 12 已新增 UI MVP 文件：`src/auto_ops/ui/view_model.py`、`src/auto_ops/ui/main_window.py`、`src/auto_ops/ui/app.py`、`tests/ui/test_view_model.py`、`tests/ui/test_app.py`、`tests/ui/test_main_window.py`。
+- Task 12 红测已在项目 `.venv` 中验证：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_view_model.py -v` 首次失败，错误为 `ModuleNotFoundError: No module named 'auto_ops.ui'`。
+- Task 12 当前最小 UI 状态模型为 `UiState(selected_scene, running, last_action)`。
+- 在代码评审后，`src/auto_ops/ui/app.py` 已补充 `_APP` 全局引用持有 `QApplication`，避免 `build_ui()` 创建的应用对象生命周期不稳定。
+- 在进一步评审回修后，`src/auto_ops/ui/app.py` 与 `src/auto_ops/ui/main_window.py` 已改为延迟导入 `PySide6`，保证未安装 Qt 的环境仍可导入 UI 模块本身，不破坏 Mac / 纯逻辑测试路径。
+- `tests/ui/test_app.py` 当前已覆盖：导入 `auto_ops.ui.app` 不要求立即安装 `PySide6`、`build_ui()` 会显示窗口且持有应用对象引用。
+- `tests/ui/test_main_window.py` 当前已覆盖：导入 `auto_ops.ui.main_window` 不要求立即安装 `PySide6`、窗口初始化会设置标题与 Ready 标签。
+- Task 12 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_view_model.py I:/work/cheat/tests/ui/test_app.py I:/work/cheat/tests/ui/test_main_window.py -v` 为 `5 passed`；合并当前回归测试后结果为 `35 passed`。
+- Task 13 本轮按安全替代版落地，未接通真实输入执行；目标是把场景配置与 UI 状态收敛到 `observe_only` / preview 预览链路。
+- Task 13 已新增预览测试文件：`tests/orchestrator/test_preview_cycle.py`。
+- `SceneConfig.mode` 已收紧为 `Literal["observe_only"]`，加载未知模式会触发 `ValidationError`；对应测试位于 `tests/config/test_loader.py`。
+- `UiState` 已新增 `observe_only: bool = True`，用于表达 UI 层默认观察模式；对应测试位于 `tests/ui/test_view_model.py`。
+- `src/auto_ops/orchestrator/engine.py` 已新增 `PreviewCycleResult` 与 `preview_cycle()`，当前只返回选中目标、计划动作和计划坐标，不调用执行器。
+- `run_cycle(..., observe_only=True)` 现已支持在观察模式下跳过真实执行，即使存在目标也返回 `execution=None`；对应测试位于 `tests/orchestrator/test_preview_cycle.py`。
+- `strategies/scenes/browser_demo.yaml` 当前已显式声明 `mode: observe_only`。
+- Task 13 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/config/test_loader.py I:/work/cheat/tests/orchestrator/test_preview_cycle.py I:/work/cheat/tests/ui/test_view_model.py -v` 为 `6 passed`；合并当前回归测试后结果为 `40 passed`。
+- Task 14 当前按安全版目标落地：不增强执行能力，只补预览链路的集成验证与回归命令基线。
+- 已新增集成测试文件：`tests/orchestrator/test_priority_and_state_integration.py`。
+- `PreviewCycleResult` 现已额外暴露 `has_blocking_target`，使预览链路可以携带状态建模摘要，而不需要真实执行。
+- `tests/orchestrator/test_priority_and_state_integration.py` 当前验证了：当同时出现 `popup_close` 与 `primary_button` 时，预览链路会保留 `has_blocking_target=True`，并按权重优先选择阻塞弹窗目标。
+- Task 14 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/orchestrator/test_preview_cycle.py I:/work/cheat/tests/orchestrator/test_priority_and_state_integration.py -v` 为 `4 passed`；合并当前回归测试后结果为 `41 passed`。
+- Task 33 当前按安全方向落地：UI 只展示 preview 结果，不接真实输入执行。
+- `UiState` 已新增 `preview_action`、`preview_point`、`has_blocking_target` 字段，用于承载预览摘要。
+- `src/auto_ops/ui/main_window.py` 现已支持接收状态对象，并在存在预览动作时展示 `Mode / Scene / Blocking / Planned` 汇总文案。
+- `src/auto_ops/ui/app.py` 现已支持 `build_ui(state=None)`，会把状态对象传入窗口实例。
+- `tests/ui/test_main_window.py` 当前已覆盖 preview 摘要渲染；`tests/ui/test_app.py` 当前已覆盖 `build_ui(state)` 的状态透传。
+- Task 33 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui -v` 为 `9 passed`；合并当前全量回归测试后结果为 `44 passed`。
+- Task 34 当前按安全方向落地：新增 `build_ui_state()`，把 `PreviewCycleResult` 组装为 `UiState`，供 UI 层消费预览摘要，不接真实输入执行。
+- `src/auto_ops/ui/view_model.py` 当前新增 `build_ui_state(selected_scene, preview=None)`，会映射 `planned_action`、`planned_point`、`has_blocking_target` 到 UI 状态。
+- 当前实现对 `preview=None` 保持默认摘要字段，对错误 preview 对象会直接暴露 `AttributeError`，避免静默吞掉回归。
+- `tests/ui/test_view_model.py` 当前已补齐 4 类覆盖：正常 preview 映射、`preview=None` 默认映射、空 preview 结果映射、错误 preview 对象报错。
+- Task 34 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_view_model.py -v` 为 `7 passed`；合并 UI 回归测试后结果为 `13 passed`；合并当前全量回归测试后结果为 `48 passed`。
+- Task 35 当前按安全方向落地：`src/auto_ops/ui/main_window.py` 已新增 `update_state()` 最小刷新入口，可用新的 `UiState` 更新窗口标签文案。
+- `tests/ui/test_main_window.py` 当前已覆盖窗口创建后刷新 preview 摘要的路径。
+- Task 35 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_main_window.py -v` 为 `4 passed`。
+- Task 36 当前按安全方向落地：`src/auto_ops/app.py` 已接通只读启动预览链路，会加载场景配置、生成 preview 摘要、组装 `UiState` 并调用 UI 启动入口。
+- `src/auto_ops/ui/app.py` 当前新增 `run_ui(state=None)`，在创建窗口后进入 Qt 事件循环；`src/auto_ops/app.py` 也已改为调用 `run_ui(state)`。
+- 启动默认场景路径已从脆弱的当前工作目录相对路径，收敛为基于源码位置解析的 `strategies/scenes/browser_demo.yaml`。
+- 当前启动链路仍然是只读占位预览，不会触发真实输入执行。
+- Task 36 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py -v` 为 `2 passed`；合并 UI 回归测试后结果为 `15 passed`；合并当前全量回归测试后结果为 `51 passed`。
+- Task 37 当前按安全方向落地：默认启动已不再使用空检测结果，而是注入一条演示 `primary_button` 检测种子，让 UI 首屏直接显示 preview 摘要。
+- `src/auto_ops/app.py` 当前默认使用 `FakeDetector([{class_name: primary_button, confidence: 0.9, bbox: (10, 10, 50, 30)}])` 生成演示 preview。
+- 默认演示 preview 当前会展示 `planned_action=click` 与 `planned_point=(30, 20)`，便于直接观察 UI 状态流。
+- Task 37 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py -v` 为 `3 passed`；合并 UI 回归测试后结果为 `15 passed`；合并当前全量回归测试后结果为 `52 passed`。
+- Task 38 当前按安全方向补做启动稳定性加固：`src/auto_ops/ui/app.py` 已新增 `_WINDOW` 全局引用，`build_ui()` / `run_ui()` 会持有主窗口实例，避免启动进入事件循环前窗口生命周期不稳定。
+- `src/auto_ops/app.py` 当前默认场景已改为通过 `importlib.resources.files("auto_ops")` + `as_file(...)` 读取包内 `resources/browser_demo.yaml`，不再依赖源码仓库相对路径。
+- `pyproject.toml` 已补充 `[tool.setuptools.package-data] auto_ops = ["resources/*.yaml"]`，用于把默认 demo 场景打入包内资源。
+- `tests/ui/test_app.py` 当前已补充 `test_run_ui_keeps_window_reference`；`tests/test_import_app.py` 当前已补充 `test_main_loads_default_scene_from_package_resource`。
+- Task 38 当前验证结果：`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/ui/test_app.py -q` 为 `5 passed`；`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests/test_import_app.py -q` 为 `4 passed`；`I:/work/cheat/.venv/Scripts/python.exe -m pytest I:/work/cheat/tests -q` 为 `54 passed`。
