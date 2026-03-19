@@ -40,6 +40,11 @@
 - 项目说明：`CLAUDE.md`
 
 ## 当前实现发现
+- 2026-03-19 范围调整：项目方向已从“安全/只读 preview 收口”切换为“分阶段推进的全流程研究型自动化工程”。
+- 当前 clean-room 原则明确：只参考外部项目结构与思路，不复制代码、驱动、模型资源，避免 GPL/许可污染。
+- 当前平台策略明确：真实窗口绑定、标准输入、模拟器、底层驱动都必须保持 Windows-only 插件化与延迟导入，不破坏 Mac 上的纯逻辑开发与测试。
+- Phase 0 第一批实现已落地：`SceneConfig` 已支持 `preview / dry_run / live`，并新增 `executor_backend`、`ocr_backend`、`window_policy`、`multi_window`、`emulator_type` 等字段。
+- 当前 `UiState` / `build_ui_state()` / `run_cycle()` / `app.py` 已切换为显式 `mode + backend` 语义；`browser_demo.yaml` 与包内默认场景当前默认使用 `mode: preview` 与 `executor_backend: standard`。
 - Task 1 已落地文件：`pyproject.toml`、`src/auto_ops/__init__.py`、`tests/conftest.py`、`tests/test_import_app.py`。
 - 当前环境中的 `python` / `python3` 都指向 WindowsApps 占位入口，不是可用解释器。
 - 进一步确认这两个入口实际都链接到 `AppInstallerPythonRedirector.exe`，说明系统当前只是安装了 Microsoft Store 的 Python 重定向器，并没有发现真实 Python 解释器。

@@ -27,13 +27,17 @@ class FakeUiState:
     def __init__(
         self,
         selected_scene="browser-demo",
-        observe_only=True,
+        mode="preview",
+        can_execute=False,
+        executor_backend="standard",
         preview_action=None,
         preview_point=None,
         has_blocking_target=False,
     ):
         self.selected_scene = selected_scene
-        self.observe_only = observe_only
+        self.mode = mode
+        self.can_execute = can_execute
+        self.executor_backend = executor_backend
         self.preview_action = preview_action
         self.preview_point = preview_point
         self.has_blocking_target = has_blocking_target
@@ -78,7 +82,7 @@ def test_main_window_renders_preview_summary(monkeypatch):
         FakeUiState(preview_action="click", preview_point=(30, 20), has_blocking_target=True)
     )
 
-    assert window.central_widget.text == "Mode: observe_only | Scene: browser-demo | Blocking: yes | Planned: click @(30, 20)"
+    assert window.central_widget.text == "Mode: preview | Backend: standard | Scene: browser-demo | Blocking: yes | Planned: click @(30, 20)"
 
 
 
@@ -94,4 +98,4 @@ def test_main_window_refreshes_preview_summary(monkeypatch):
 
     window.update_state(FakeUiState(preview_action="click", preview_point=(30, 20), has_blocking_target=True))
 
-    assert window.central_widget.text == "Mode: observe_only | Scene: browser-demo | Blocking: yes | Planned: click @(30, 20)"
+    assert window.central_widget.text == "Mode: preview | Backend: standard | Scene: browser-demo | Blocking: yes | Planned: click @(30, 20)"

@@ -1,7 +1,11 @@
 scene:
   id: browser-demo
   name: Browser Demo
-  mode: observe_only
+  mode: preview
+  executor_backend: standard
+  ocr_backend: none
+  window_policy: focused
+  multi_window: false
   window_match:
     title_contains:
       - Demo
